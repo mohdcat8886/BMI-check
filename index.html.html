@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMI & Obesity Checker (Asian Classification)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thaana&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --underweight: #5b9bd5;
+    --normal: #4caf50;
+    --overweight: #f4b400;
+    --obese1: #e67e22;
+    --obese2: #c0392b;
+    --bg: #f7f9fb;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px 60px;
+  }
+  body.dv { font-family: 'Noto Sans Thaana', 'Inter', sans-serif; }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  .langbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 16px; }
+  .langbtn {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .langbtn.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .row { display: flex; gap: 12px; margin-bottom: 14px; }
+  .field { flex: 1; }
+  label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fff;
+    color: var(--text);
+    font-family: inherit;
+  }
+  input:focus { outline: 2px solid #93c5fd; border-color: #93c5fd; }
+  button.calc {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    font-family: inherit;
+  }
+  button.calc:hover { background: #1d4ed8; }
+  #result { margin-top: 18px; display: none; }
+  .bmi-value { font-size: 2.2rem; font-weight: 700; margin: 0; }
+  .bmi-label {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-top: 6px;
+  }
+  .note { font-size: 0.85rem; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); }
+  body.dv th, body.dv td { text-align: right; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  body.dv th { text-transform: none; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+  body.dv .dot { margin-right: 0; margin-left: 8px; }
+  .highlight-row { background: #eff6ff; }
+  .disclaimer { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 24px; line-height: 1.6; }
+  h2 { font-size: 1.05rem; margin-top: 0; }
+</style>
+</head>
+<body id="bodyEl">
+<div class="wrap">
+  <div class="langbar">
+    <button class="langbtn active" id="btnEn" onclick="setLang('en')">English</button>
+    <button class="langbtn" id="btnDv" onclick="setLang('dv')">ދިވެހި</button>
+  </div>
+
+  <h1 data-en="Check Your BMI — Asian Classification" data-dv="ތިބާގެ BMI ބައްލަވާ — އޭޝިޔާ ކެޓަގަރީ">Check Your BMI — Asian Classification</h1>
+  <p class="subtitle" data-en="This uses the WHO Asia-Pacific BMI cut-offs, which apply lower thresholds than the standard classification because health risks (like diabetes and heart disease) appear at lower BMI levels in Asian populations." data-dv="މިއީ WHO ގެ އޭޝިއާ-ޕެސިފިކް BMI މިންގަނޑުތަކެވެ. އޭޝިއާ މީހުންގެ ސިއްހީ ނުރައްކާތައް (ހަކުރު ބަލި، ހިތުގެ ބަލި ފަދަ) ދަށް BMI މިންވަރެއްގައި ފެންނާތީ، މި މިންގަނޑުތައް އާންމު މިންގަނޑަށްވުރެ ދަށެވެ.">This uses the WHO Asia-Pacific BMI cut-offs...</p>
+
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label data-en="Height (cm)" data-dv="އިސްކޮޅު (ސމ)">Height (cm)</label>
+        <input type="number" id="height" placeholder="e.g. 165" inputmode="decimal">
+      </div>
+      <div class="field">
+        <label data-en="Weight (kg)" data-dv="ބަރުދަން (ކިލޯ)">Weight (kg)</label>
+        <input type="number" id="weight" placeholder="e.g. 68" inputmode="decimal">
+      </div>
+    </div>
+    <button class="calc" data-en="Calculate My BMI" data-dv="BMI ހިސާބުކުރައްވާ" onclick="calculateBMI()">Calculate My BMI</button>
+
+    <div id="result">
+      <p class="bmi-value" id="bmiNum">--</p>
+      <span class="bmi-label" id="bmiTag">--</span>
+      <p class="note" id="bmiNote"></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 data-en="Asian BMI Categories" data-dv="އޭޝިއާ BMI ކެޓަގަރީތައް">Asian BMI Categories</h2>
+    <table id="refTable">
+      <thead>
+        <tr>
+          <th data-en="Category" data-dv="ކެޓަގަރީ">Category</th>
+          <th data-en="BMI (kg/m²)" data-dv="BMI (kg/m²)">BMI (kg/m²)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-cat="underweight">
+          <td><span class="dot" style="background:var(--underweight)"></span><span data-en="Underweight" data-dv="ބަރުދަން ލުއި">Underweight</span></td>
+          <td data-en="Below 18.5" data-dv="18.5 އަށްވުރެ ދަށް">Below 18.5</td>
+        </tr>
+        <tr data-cat="normal">
+          <td><span class="dot" style="background:var(--normal)"></span><span data-en="Normal range" data-dv="ރަނގަޅު މިންވަރު">Normal range</span></td>
+          <td data-en="18.5 – 22.9" data-dv="18.5 – 22.9">18.5 – 22.9</td>
+        </tr>
+        <tr data-cat="overweight">
+          <td><span class="dot" style="background:var(--overweight)"></span><span data-en="Overweight (at risk)" data-dv="ބަރުދަން ބޮޑު (ނުރައްކާ ހުރި)">Overweight (at risk)</span></td>
+          <td data-en="23.0 – 24.9" data-dv="23.0 – 24.9">23.0 – 24.9</td>
+        </tr>
+        <tr data-cat="obese1">
+          <td><span class="dot" style="background:var(--obese1)"></span><span data-en="Obese I" data-dv="ފަރުބަރުދަން I">Obese I</span></td>
+          <td data-en="25.0 – 29.9" data-dv="25.0 – 29.9">25.0 – 29.9</td>
+        </tr>
+        <tr data-cat="obese2">
+          <td><span class="dot" style="background:var(--obese2)"></span><span data-en="Obese II" data-dv="ފަރުބަރުދަން II">Obese II</span></td>
+          <td data-en="30.0 and above" data-dv="30.0 އަދި މަތި">30.0 and above</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="disclaimer" data-en="This tool is for general awareness only and does not replace a medical consultation. BMI does not account for muscle mass, fat distribution, age, or individual health conditions. Please discuss your results with your doctor." data-dv="މި ޓޫލަކީ އާންމު މައުލޫމާތަށްޓަކައި ބޭނުންކުރާ އެއްޗެކެވެ، ޑޮކްޓަރެއްގެ ލަފާ ބަދަލެއް ނުކުރެއެވެ. BMI ގައި މަސްގަނޑު، ސަރުބީ ބެހިފައިވާ ގޮތް، އުމުރު، ނުވަތަ ފަރުދީ ސިއްހީ ހާލަތު ހިމެނިފައި ނުވެއެވެ. ނަތީޖާ ޑޮކްޓަރަކާ މަޝްވަރާ ކުރައްވާ.">This tool is for general awareness only...</p>
+</div>
+
+<script>
+let currentLang = 'en';
+let lastCatKey = null;
+
+const notes = {
+  en: {
+    underweight: 'Your weight is below the healthy range. Consider discussing nutrition with your doctor.',
+    normal: 'Your BMI is within the healthy range for Asian populations. Keep up your healthy habits.',
+    overweight: 'You are in the "at risk" range. This is a good time to focus on diet and physical activity to prevent further weight gain.',
+    obese1: 'You fall into the Obese I category. It is recommended you speak with a healthcare provider about weight management.',
+    obese2: 'You fall into the Obese II category, associated with higher health risk. Please consult a healthcare provider for personalized advice.'
+  },
+  dv: {
+    underweight: 'ތިބާގެ ބަރުދަން ރަނގަޅު މިންވަރަށްވުރެ ދަށެވެ. ކާނާއާ ބެހޭގޮތުން ޑޮކްޓަރަކާ މަޝްވަރާ ކުރައްވާ.',
+    normal: 'ތިބާގެ BMI އޭޝިއާ މީހުންނަށް ރަނގަޅު މިންވަރުގައި ހުރީއެވެ. ރަނގަޅު އާދަތައް ދަމަހައްޓަވާ.',
+    overweight: 'ތިބާ ހުރީ "ނުރައްކާ" މިންވަރެއްގައެވެ. ކާނާއާއި ކަސްރަތަށް ސަމާލުކަން ދެއްވުމަށް ރަނގަޅު ފުރުސަތެކެވެ.',
+    obese1: 'ތިބާ ފަރުބަރުދަން I ކެޓަގަރީގައި ހިމެނެއެވެ. ބަރުދަން ބެލެހެއްޓުމާ ބެހޭގޮތުން ޑޮކްޓަރަކާ މަޝްވަރާ ކުރެއްވުން ރަނގަޅެވެ.',
+    obese2: 'ތިބާ ފަރުބަރުދަން II ކެޓަގަރީގައި ހިމެނެއެވެ، މިއީ ސިއްހީ ނުރައްކާ ބޮޑު މިންވަރެކެވެ. ޑޮކްޓަރެއްގެ ލަފާ ހޯއްދަވާ.'
+  }
+};
+
+const categoryNames = {
+  en: { underweight: 'Underweight', normal: 'Normal range', overweight: 'Overweight (at risk)', obese1: 'Obese I', obese2: 'Obese II' },
+  dv: { underweight: 'ބަރުދަން ލުއި', normal: 'ރަނގަޅު މިންވަރު', overweight: 'ބަރުދަން ބޮޑު (ނުރައްކާ ހުރި)', obese1: 'ފަރުބަރުދަން I', obese2: 'ފަރުބަރުދަން II' }
+};
+
+function setLang(lang) {
+  currentLang = lang;
+  const body = document.getElementById('bodyEl');
+  const html = document.getElementById('htmlRoot');
+  body.classList.toggle('dv', lang === 'dv');
+  html.setAttribute('lang', lang);
+  html.setAttribute('dir', lang === 'dv' ? 'rtl' : 'ltr');
+
+  document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+  document.getElementById('btnDv').classList.toggle('active', lang === 'dv');
+
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.textContent = el.getAttribute('data-' + lang);
+  });
+
+  if (lastCatKey) {
+    document.getElementById('bmiTag').textContent = categoryNames[lang][lastCatKey];
+    document.getElementById('bmiNote').textContent = notes[lang][lastCatKey];
+  }
+}
+
+function calculateBMI() {
+  const heightCm = parseFloat(document.getElementById('height').value);
+  const weightKg = parseFloat(document.getElementById('weight').value);
+  const resultBox = document.getElementById('result');
+
+  if (!heightCm || !weightKg || heightCm <= 0 || weightKg <= 0) {
+    alert(currentLang === 'dv' ? 'ރަނގަޅު އިސްކޮޅާއި ބަރުދަން ޖައްސަވާ.' : 'Please enter a valid height and weight.');
+    return;
+  }
+
+  const heightM = heightCm / 100;
+  const bmi = weightKg / (heightM * heightM);
+  const bmiRounded = bmi.toFixed(1);
+
+  let catKey, color;
+  if (bmi < 18.5) { catKey = 'underweight'; color = 'var(--underweight)'; }
+  else if (bmi < 23) { catKey = 'normal'; color = 'var(--normal)'; }
+  else if (bmi < 25) { catKey = 'overweight'; color = 'var(--overweight)'; }
+  else if (bmi < 30) { catKey = 'obese1'; color = 'var(--obese1)'; }
+  else { catKey = 'obese2'; color = 'var(--obese2)'; }
+
+  lastCatKey = catKey;
+
+  document.getElementById('bmiNum').textContent = bmiRounded;
+  const tag = document.getElementById('bmiTag');
+  tag.textContent = categoryNames[currentLang][catKey];
+  tag.style.background = color;
+  document.getElementById('bmiNote').textContent = notes[currentLang][catKey];
+  resultBox.style.display = 'block';
+
+  document.querySelectorAll('#refTable tbody tr').forEach(row => {
+    row.classList.toggle('highlight-row', row.dataset.cat === catKey);
+  });
+
+  resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+</body>
+</html>
